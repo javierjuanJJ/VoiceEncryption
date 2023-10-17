@@ -32,6 +32,8 @@ android {
 }
 
 dependencies {
+// https://mvnrepository.com/artifact/commons-io/commons-io
+    implementation("commons-io:commons-io:2.14.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")

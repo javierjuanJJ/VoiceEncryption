@@ -6,14 +6,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.tts.TextToSpeech;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -58,13 +64,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
-        int idView = view.getId();
-        switch (idView){
-            case R.id.btnPlayAudio: break;
-            case R.id.btnStopAudio: break;
-            case R.id.btnPlayAudio2: break;
+        switch (view.getId()){
+            case R.id.btnPlayAudio:
+                startSound();
+                break;
+            case R.id.btnStopAudio:
+                player.stop();
+                break;
+            case R.id.btnPlayAudio2:
+
+                break;
             default:
-                throw new IllegalStateException("Unexpected value: " + idView);
+                // throw new IllegalStateException("Unexpected value: " + idView);
         }
     }
+
+    private void startSound() {
+        AssetFileDescriptor assetFileDescriptor = null;
+        try {
+            assetFileDescriptor = getResources().getAssets().openFd("mirage.mp3");
+            file = new File(Environment.getExternalStorageDirectory() + "/mirage.mo3");
+            byte[] bytes = FileUtils.readFileToByteArray(file);
+            encrypt = Base64.encodeToString(bytes, 0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void CipherEncrypt(String text, int s){
+        StringBuilder result = new StringBuilder();
+
+        for (int counter = 0; counter < text.length(); counter++) {
+
+            result.append(Character.isUpperCase(text.charAt(counter)) ? (char) (((int) text.charAt(counter) + s - 65) % 26 + 65): (char) (((int) text.charAt(counter) + s - 97) % 26 + 97));
+        }
+        encrypt = getOnlyString(result.toString());
+    }
+
+    private String getOnlyString(String toString) {
+        return null;
+    }
+
 }
