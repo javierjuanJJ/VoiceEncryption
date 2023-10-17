@@ -2,8 +2,6 @@ package com.example.voiceencryption;
 
 import static android.os.Build.VERSION.SDK_INT;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.res.AssetFileDescriptor;
@@ -15,6 +13,8 @@ import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.apache.commons.io.FileUtils;
 
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int REQUEST_WRITE_PERMISSION = 1;
     private TextToSpeech textToSpeech;
     private String encrypt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void requestPermissions() {
-        if(SDK_INT >= Build.VERSION_CODES.M) {
+        if (SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
         }
     }
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btnPlayAudio:
                 startSound();
                 break;
@@ -80,9 +81,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startSound() {
-        AssetFileDescriptor assetFileDescriptor = null;
-        try {
-            assetFileDescriptor = getResources().getAssets().openFd("mirage.mp3");
+        try (
+                AssetFileDescriptor assetFileDescriptor = getResources().getAssets().openFd("mirage.mp3")
+        ) {
             file = new File(Environment.getExternalStorageDirectory() + "/mirage.mo3");
             byte[] bytes = FileUtils.readFileToByteArray(file);
             encrypt = Base64.encodeToString(bytes, 0);
@@ -91,12 +92,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void CipherEncrypt(String text, int s){
+    public void CipherEncrypt(String text, int s) {
         StringBuilder result = new StringBuilder();
 
         for (int counter = 0; counter < text.length(); counter++) {
 
-            result.append(Character.isUpperCase(text.charAt(counter)) ? (char) (((int) text.charAt(counter) + s - 65) % 26 + 65): (char) (((int) text.charAt(counter) + s - 97) % 26 + 97));
+            result.append(Character.isUpperCase(text.charAt(counter)) ? (char) (((int) text.charAt(counter) + s - 65) % 26 + 65) : (char) (((int) text.charAt(counter) + s - 97) % 26 + 97));
         }
         encrypt = getOnlyString(result.toString());
     }
