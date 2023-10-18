@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startSound();
                 break;
             case R.id.btnStopAudio:
-
+                finishSong(player);
                 break;
             case R.id.btnPlayAudio2:
                 textToSpeech.speak(encrypt.substring(2, 30), TextToSpeech.QUEUE_FLUSH, null);
