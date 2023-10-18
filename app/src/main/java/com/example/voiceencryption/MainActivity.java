@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,9 +20,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextToSpeech.OnInitListener {
 
     private Button btnPlayAudio, btnStopAudio, btnPlayAudio2;
     private MediaPlayer player;
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnStopAudio.setOnClickListener(this);
         btnPlayAudio2.setOnClickListener(this);
 
+        textToSpeech = new TextToSpeech(getApplicationContext(), this);
+
         requestPermissions();
 
     }
@@ -73,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 player.stop();
                 break;
             case R.id.btnPlayAudio2:
-
+                textToSpeech.speak(encrypt.substring(2,30), TextToSpeech.QUEUE_FLUSH, null);
                 break;
             default:
                 // throw new IllegalStateException("Unexpected value: " + idView);
@@ -82,12 +88,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startSound() {
         try (
-                AssetFileDescriptor assetFileDescriptor = getResources().getAssets().openFd("mirage.mp3")
+                AssetFileDescriptor assetFileDescriptor = getResources().getAssets().openFd("mirage.mp3");
+                FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory() + "/hello-5.mp3", true);
         ) {
-            file = new File(Environment.getExternalStorageDirectory() + "/mirage.mo3");
+
+            file = new File(Environment.getExternalStorageDirectory() + "/mirage.mp3");
             byte[] bytes = FileUtils.readFileToByteArray(file);
-            encrypt = Base64.encodeToString(bytes, 0);
+            String encoded = Base64.encodeToString(bytes, 0);
+
+            CipherEncrypt(encoded, 5);
+            byte[] decoded = Base64.decode(encoded, 0);
+            os.write(decoded);
+
+            if (assetFileDescriptor != null){
+                player.setDataSource(file.toString());
+                player.prepare();
+                player.start();
+            }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -99,11 +120,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             result.append(Character.isUpperCase(text.charAt(counter)) ? (char) (((int) text.charAt(counter) + s - 65) % 26 + 65) : (char) (((int) text.charAt(counter) + s - 97) % 26 + 97));
         }
-        encrypt = getOnlyString(result.toString());
+        encrypt = Utity.getOnlyString(result.toString());
+        try(FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory() + "/jirage.mp3", true);) {
+            byte[] decoded = Base64.decode(result.toString(), 0);
+            os.write(decoded);
+        }catch (Exception e){
+            Log.e("ExceptionError", Objects.requireNonNull(e.getMessage()));
+        }
     }
 
-    private String getOnlyString(String toString) {
-        return null;
+    @Override
+    public void onInit(int i) {
+        if(i != TextToSpeech.ERROR){
+            textToSpeech.setLanguage(Locale.UK);
+        }
     }
-
 }
